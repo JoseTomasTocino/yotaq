@@ -37,52 +37,58 @@ def do_something(arg1, arg2):
 
 Now we need to configure our redis client:
 
-    import redis
-    
-    r = redis.Redis(
-        host='localhost',
-        port=6379
-    )
+```python
+import redis
+
+r = redis.Redis(
+    host='localhost',
+    port=6379
+)
+```
     
 Once that's done, we're ready to generate and enqueue some tasks:
 
-    import dill
-    
-    # Generate N tasks
-    NUM_TASKS = 100
-    logger.info("Generating %i tasks", NUM_TASKS)
+```python
+import dill
 
-    for i in range(NUM_TASKS):
+# Generate N tasks
+NUM_TASKS = 100
+logger.info("Generating %i tasks", NUM_TASKS)
 
-        # Generate two random arguments                                                                                       
-        a1 = random.randrange(0, 100)
-        a2 = random.randrange(0, 100)
+for i in range(NUM_TASKS):
 
-        # Serialize the task and its arguments                                                                                
-        data = dill.dumps((do_something, [a1, a2]))
+    # Generate two random arguments                                                                                       
+    a1 = random.randrange(0, 100)
+    a2 = random.randrange(0, 100)
 
-        # Store it in the message broker                                                                                      
-        r.rpush('tasks', data)
+    # Serialize the task and its arguments                                                                                
+    data = dill.dumps((do_something, [a1, a2]))
+
+    # Store it in the message broker                                                                                      
+    r.rpush('tasks', data)
+```
 
 # The worker
 
 The _worker_ will do the work (who would've guessed?) by keeping an eye on the task queue and fetching the available tasks to run. Pretty simple. So open up an editor to create our `worker.py` file and write the following:
 
-    # Configure our redis client 
-    r = redis.Redis(
-        host='localhost',
-        port=6379
-    )
+```python
+# Configure our redis client 
+r = redis.Redis(
+    host='localhost',
+    port=6379
+)
 
-    while True:
-        # Wait until there's an element in the 'tasks' queue
-        key, data = r.brpop('tasks')
+while True:
+    # Wait until there's an element in the 'tasks' queue
+    key, data = r.brpop('tasks')
 
-        # Deserialize the task
-        d_fun, d_args = dill.loads(data)
+    # Deserialize the task
+    d_fun, d_args = dill.loads(data)
 
-        # Run the task
-        d_fun(*d_args)
+    # Run the task
+    d_fun(*d_args)
+```
 
 Boom! You're done! Run some workers with:
 
