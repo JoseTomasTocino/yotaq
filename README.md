@@ -65,7 +65,7 @@ for i in range(NUM_TASKS):
     data = dill.dumps((do_something, [a1, a2]))
 
     # Store it in the message broker                                                                                      
-    r.rpush('tasks', data)
+    r.lpush('tasks', data)
 ```
 
 # The worker

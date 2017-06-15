@@ -39,7 +39,7 @@ def main_client():
         data = dill.dumps((do_something, [a1, a2]))
 
         # Store it in the message broker                                                                                      
-        r.rpush('tasks', data)
+        r.lpush('tasks', data)
 
 
 if __name__ == '__main__':
